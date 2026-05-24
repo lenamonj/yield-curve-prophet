@@ -1,15 +1,15 @@
 <p align="center">
-  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.10+-blue?logo=python&logoColor=white" alt="Python 3.10+"></a>
-  <a href="https://pytorch.org/"><img src="https://img.shields.io/badge/PyTorch-EE4C2C?logo=pytorch&logoColor=white" alt="PyTorch"></a>
-  <a href="https://xgboost.readthedocs.io/"><img src="https://img.shields.io/badge/XGBoost-EC6C37?logo=xgboost&logoColor=white" alt="XGBoost"></a>
-  <a href="https://fred.stlouisfed.org/docs/api/"><img src="https://img.shields.io/badge/Data-FRED%20API-green" alt="Data: FRED API"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue" alt="License: MIT"></a>
+  <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
+  <img src="https://img.shields.io/badge/PyTorch-LSTM-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white" alt="PyTorch">
+  <img src="https://img.shields.io/badge/XGBoost-Gradient%20Boosting-EC6C37?style=for-the-badge&logo=xgboost&logoColor=white" alt="XGBoost">
+  <img src="https://img.shields.io/badge/Data-FRED%20API-6DB33F?style=for-the-badge&logo=api&logoColor=white" alt="FRED API">
+  <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="MIT License">
 </p>
 
 <h1 align="center">Yield Curve Prophet</h1>
 
 <p align="center">
-  <strong>A PyTorch LSTM + XGBoost ensemble that predicts weekly directional moves in US Treasury yields (2Y, 10Y, 2s10s spread), trained on 20 years of FRED macro data with walk-forward validation and SHAP interpretability.</strong>
+  <strong>A PyTorch LSTM + XGBoost ensemble that predicts weekly directional moves in US Treasury yields (2Y, 10Y, 2s10s spread), trained on 19 years of FRED macro data with walk-forward validation, SHAP interpretability, and statistical significance testing.</strong>
 </p>
 
 <p align="center">
@@ -18,24 +18,47 @@
 
 ---
 
+## Key Result
+
+The 2s10s spread direction (steepening vs. flattening) is predictable at **60.1% accuracy** (p = 0.000005), statistically significant at the 99.9% confidence level. Outright yield direction carries weaker but detectable signal (2Y at 54.0%, 10Y at 53.6%).
+
+| Target | XGBoost | LSTM | Ensemble | p-value | Significant? |
+|--------|---------|------|----------|---------|-------------|
+| 2Y Yield Direction | **54.0%** | 47.3% | 47.3% | 0.0431 | Yes (95%) |
+| 10Y Yield Direction | **53.6%** | 50.5% | 50.5% | 0.0624 | Marginal (90%) |
+| 2s10s Spread Direction | 54.4% | 58.0% | **60.1%** | **0.000005** | **Yes (99.9%)** |
+
+Baseline (coin flip): 50.0%
+
+---
+
 ## Why This Exists
 
-Yield curve prediction is core to fixed income portfolio management. Where rates go next drives duration positioning, curve trades, and spread sector allocation. Most forecasting in practice is discretionary - portfolio managers reading tea leaves from dot plots and payrolls prints.
+The yield curve is the most watched indicator in fixed income. Its shape drives portfolio positioning, curve trades, and macro regime classification. Most forecasting is still discretionary - PMs reading dot plots and payrolls prints.
 
-This project tests whether machines can beat a coin flip on weekly rate direction using nothing but free public data from FRED. No proprietary feeds, no Bloomberg, no vendor lock-in. If a simple LSTM + XGBoost ensemble can reliably predict direction even 55-60% of the time, that is an edge worth exploring.
+This project tests whether a machine can beat a coin flip at predicting the direction of weekly yield moves using only free public data. The answer: outright yield direction is hard, but curve spread direction carries statistically significant signal that the ensemble captures at 60.1% accuracy.
+
+---
 
 ## What It Produces
 
+A single Jupyter notebook that runs the complete pipeline:
+
 | Stage | Description |
-|---|---|
-| **Data Collection** | 15 FRED macro series, 2005-2025 |
-| **Feature Engineering** | ~80-100 features (rolling changes, volatility, z-scores, momentum) |
-| **XGBoost Baseline** | Optuna-tuned gradient boosting (100 trials per target) |
+|-------|-------------|
+| **Data Collection** | 12 FRED macro series, 2005-2026 |
+| **Feature Engineering** | 90 features (rolling changes, volatility, z-scores, momentum) |
+| **XGBoost Baseline** | Optuna-tuned gradient boosting (100 trials per target), SHAP interpretability |
 | **LSTM** | 2-layer LSTM (128->64), 60-day lookback, early stopping |
-| **Ensemble** | Weighted blend optimized on validation set |
-| **Evaluation** | Accuracy, ROC-AUC, Brier score, SHAP, calibration plots, hypothetical P&L |
+| **Ensemble** | Weighted blend optimized per target on validation set |
+| **Significance Test** | Binomial test on each target (H0: accuracy = 50%) |
+| **Evaluation** | ROC curves, confusion matrices, rolling accuracy, calibration, hypothetical P&L |
+
+---
 
 ## Quick Start
+
+### 1. Clone and install
 
 ```bash
 git clone https://github.com/lenamonj/yield-curve-prophet.git
@@ -43,85 +66,102 @@ cd yield-curve-prophet
 pip install -r requirements.txt
 ```
 
-Set your FRED API key (free from [FRED](https://fred.stlouisfed.org/docs/api/api_key.html)):
+### 2. Set your API key
+
+Register for a free key at [fred.stlouisfed.org](https://fred.stlouisfed.org/docs/api/api_key.html).
 
 ```bash
-export FRED_API_KEY="your_key_here"
+export FRED_API_KEY="your-key-here"
 ```
 
-Run the full pipeline:
+Or on Windows PowerShell:
+
+```powershell
+$env:FRED_API_KEY = "your-key-here"
+```
+
+### 3. Run
 
 ```bash
 jupyter notebook yield_curve_prophet.ipynb
 ```
 
+Full execution takes 10-15 minutes (Optuna tuning + LSTM training).
+
+---
+
 ## Data Source
 
-All data comes from the [FRED API](https://fred.stlouisfed.org/docs/api/) - free with registration.
+All data comes from the [FRED API](https://fred.stlouisfed.org/docs/api/fred/) (free, 120 requests/minute).
 
-| Series ID | Description |
-|---|---|
-| `DGS2` | 2-Year Treasury Constant Maturity Rate |
-| `DGS10` | 10-Year Treasury Constant Maturity Rate |
-| `DGS30` | 30-Year Treasury Constant Maturity Rate |
-| `DFEDTARU` | Federal Funds Target Rate (Upper) |
-| `T10Y2Y` | 10Y-2Y Treasury Spread |
-| `T10Y3M` | 10Y-3M Treasury Spread |
-| `BAMLH0A0HYM2` | ICE BofA US High Yield OAS |
-| `BAMLC0A4CBBB` | ICE BofA BBB Corporate OAS |
-| `VIXCLS` | CBOE Volatility Index (VIX) |
-| `DTWEXBGS` | Trade-Weighted USD Index (Broad) |
-| `CPIAUCSL` | Consumer Price Index (All Urban) |
-| `UNRATE` | Unemployment Rate |
-| `PAYEMS` | Total Nonfarm Payrolls |
-| `UMCSENT` | University of Michigan Consumer Sentiment |
-| `GDPC1` | Real GDP (Quarterly) |
+| Category | Series ID | Description | Frequency |
+|----------|-----------|-------------|-----------|
+| Treasury Yields | DGS2, DGS5, DGS10, DGS30 | Constant maturity yields | Daily |
+| Monetary Policy | DFF | Effective federal funds rate | Daily |
+| Inflation | T10YIE | 10-year breakeven inflation | Daily |
+| Inflation | T5YIFR | 5Y5Y forward inflation expectation | Daily |
+| Labor | UNRATE | Unemployment rate | Monthly |
+| Growth | INDPRO | Industrial production index | Monthly |
+| Sentiment | UMCSENT | Consumer sentiment | Monthly |
+| Volatility | VIXCLS | CBOE VIX | Daily |
+| Dollar | DTWEXBGS | Trade-weighted dollar index | Daily |
+
+See `final_features.txt` for the complete feature dictionary (90 engineered features with definitions).
+
+---
 
 ## Design Decisions
 
-- **Walk-forward temporal validation** - Train 2005-2018, validation 2019-2020, test 2021-2025. No future leakage.
-- **XGBoost as baseline** - Proves whether the LSTM actually adds value over a strong tree-based model.
-- **Rolling standardization with train-only statistics** - Features are standardized using rolling windows fit only on training data to prevent look-ahead bias.
-- **Optuna over grid search** - 100-trial Bayesian optimization per target beats brute-force grid search on both runtime and performance.
-- **Binary classification (direction) over regression (magnitude)** - Predicting "up or down" is more actionable for duration positioning than predicting exact basis point moves.
-- **SHAP for interpretability** - Every prediction is explainable. Feature importance is not a black box.
+- **70/15/15 walk-forward split** - Train (70%), validation (15%), test (15%) with 63-day leakage gaps between each split. No random shuffling, no future information leakage.
+- **XGBoost as point-in-time baseline** - Sees only today's feature snapshot. Proves whether the LSTM's sequential modeling adds value.
+- **LSTM as sequential model** - 60-day lookback window captures momentum shifts, volatility clustering, and regime transitions.
+- **Ensemble** - Weighted blend of both models, optimized per target. The combination outperforms either model alone on the 2s10s spread.
+- **Optuna over grid search** - 100-trial Bayesian optimization per target for XGBoost hyperparameters.
+- **Binary classification over regression** - Predicting "up or down" is more actionable than predicting exact basis point moves.
+- **SHAP for interpretability** - Every XGBoost prediction is explainable via feature attribution.
+- **Binomial significance test** - Statistical rigor: the null hypothesis (50% accuracy) is formally tested for each target.
+- **SEED=42 locked** - numpy, PyTorch, and Optuna seeds fixed for full reproducibility.
+
+---
 
 ## Project Structure
 
 ```
 yield-curve-prophet/
-├── yield_curve_prophet.ipynb   # Full pipeline notebook
-├── src/
-│   ├── data.py                 # FRED data collection and cleaning
-│   ├── features.py             # Feature engineering pipeline
-│   ├── models.py               # XGBoost and LSTM model definitions
-│   ├── ensemble.py             # Weighted ensemble logic
-│   └── evaluation.py           # Metrics, SHAP, calibration, P&L
-├── config/
-│   └── params.yaml             # Hyperparameters and FRED series config
-├── requirements.txt
-├── LICENSE
-└── README.md
+|-- README.md
+|-- LICENSE
+|-- requirements.txt
+|-- .gitignore
+|-- final_features.txt              # Complete feature dictionary (90 features)
++-- yield_curve_prophet.ipynb       # Full pipeline - one notebook
 ```
+
+---
 
 ## Dependencies
 
 | Package | Purpose |
-|---|---|
-| `torch` | LSTM model architecture and training |
+|---------|---------|
+| `pandas` | Data manipulation and time series alignment |
+| `numpy` | Numerical computation |
+| `requests` | FRED API calls |
+| `torch` | LSTM neural network |
+| `torchinfo` | Model architecture summary |
 | `xgboost` | Gradient boosting baseline |
 | `optuna` | Bayesian hyperparameter optimization |
-| `pandas` | Data manipulation and time series |
-| `numpy` | Numerical computation |
-| `scikit-learn` | Metrics, preprocessing, validation splits |
-| `shap` | Model interpretability |
-| `fredapi` | FRED data access |
-| `matplotlib` | Visualization and calibration plots |
+| `shap` | Model interpretability (feature attribution) |
+| `scikit-learn` | Metrics, preprocessing, calibration |
+| `matplotlib` | Visualization |
+| `seaborn` | Statistical plots |
+
+---
 
 ## License
 
-MIT
+This project is licensed under the [MIT License](LICENSE).
+
+---
 
 <p align="center">
-  <em>Built with PyTorch, XGBoost, and the FRED API. No proprietary data feeds required.</em>
+  <sub>Built with PyTorch, XGBoost, and the FRED API. No proprietary data feeds required.</sub>
 </p>
