@@ -1,0 +1,134 @@
+YIELD CURVE PROPHET - COMPLETE FEATURE DICTIONARY
+===================================================
+Generated: May 2026
+Total features used in model: 90
+Source: FRED API (Federal Reserve Economic Data)
+Period: 2005-2025 (~4,715 trading days after engineering)
+
+===================================================
+RAW SERIES FROM FRED (12 series)
+===================================================
+
+DGS2              2-Year Treasury Constant Maturity Yield (%)           Daily
+DGS5              5-Year Treasury Constant Maturity Yield (%)           Daily
+DGS10             10-Year Treasury Constant Maturity Yield (%)          Daily
+DGS30             30-Year Treasury Constant Maturity Yield (%)          Daily
+DFF               Effective Federal Funds Rate (%)                      Daily
+T10YIE            10-Year Breakeven Inflation Rate (%)                  Daily
+T5YIFR            5-Year, 5-Year Forward Inflation Expectation (%)      Daily
+UNRATE            Civilian Unemployment Rate (%, monthly, ffill)        Monthly
+INDPRO            Industrial Production Index (monthly, ffill)          Monthly
+UMCSENT           U of Michigan Consumer Sentiment (monthly, ffill)     Monthly
+VIXCLS            CBOE Volatility Index (VIX)                           Daily
+DTWEXBGS          Trade-Weighted US Dollar Index (Broad Goods/Svc)      Daily
+
+Note: ICSA (Initial Jobless Claims) and BAMLH0A0HYM2 (HY OAS) were dropped
+due to <50% coverage across the full sample period. TEDRATE (TED Spread) was
+removed because it was discontinued in January 2022, causing downstream NaN
+propagation in rolling z-score calculations.
+
+===================================================
+DERIVED SERIES (3 series)
+===================================================
+
+spread_2s10s      2s10s Yield Curve Spread: DGS10 - DGS2 (%)
+spread_5s30s      5s30s Yield Curve Spread: DGS30 - DGS5 (%)
+real_10y          Real 10-Year Yield: DGS10 - T10YIE (%)
+
+===================================================
+ENGINEERED FEATURES (6 per series x 15 series = 90)
+===================================================
+
+For each of the 12 raw + 3 derived series listed above, the following
+6 features are computed. Feature names follow the pattern: {series}_{suffix}
+
+{series}_chg5d    5-day change (1-week delta)
+                  Definition: value(t) - value(t-5)
+                  Captures: short-term momentum
+
+{series}_chg21d   21-day change (1-month delta)
+                  Definition: value(t) - value(t-21)
+                  Captures: medium-term trend
+
+{series}_chg63d   63-day change (1-quarter delta)
+                  Definition: value(t) - value(t-63)
+                  Captures: cyclical moves and regime shifts
+
+{series}_vol21d   21-day realized volatility
+                  Definition: rolling 21-day standard deviation of daily changes
+                  Captures: volatility clustering and regime transitions
+
+{series}_zscore   Z-score vs 252-day rolling statistics
+                  Definition: (value(t) - rolling_mean_252d) / rolling_std_252d
+                  Captures: where the current reading sits relative to its 1-year history
+
+{series}_momentum Momentum signal (binary)
+                  Definition: 1 if 5-day MA > 21-day MA, else 0
+                  Captures: short-term trend direction (golden/death cross analog)
+
+===================================================
+COMPLETE FEATURE LIST (90 features)
+===================================================
+
+DGS2_chg5d                    DGS5_chg5d                    DGS10_chg5d
+DGS2_chg21d                   DGS5_chg21d                   DGS10_chg21d
+DGS2_chg63d                   DGS5_chg63d                   DGS10_chg63d
+DGS2_vol21d                   DGS5_vol21d                   DGS10_vol21d
+DGS2_zscore                   DGS5_zscore                   DGS10_zscore
+DGS2_momentum                 DGS5_momentum                 DGS10_momentum
+
+DGS30_chg5d                   DFF_chg5d                     T10YIE_chg5d
+DGS30_chg21d                  DFF_chg21d                    T10YIE_chg21d
+DGS30_chg63d                  DFF_chg63d                    T10YIE_chg63d
+DGS30_vol21d                  DFF_vol21d                    T10YIE_vol21d
+DGS30_zscore                  DFF_zscore                    T10YIE_zscore
+DGS30_momentum                DFF_momentum                  T10YIE_momentum
+
+T5YIFR_chg5d                  UNRATE_chg5d                  INDPRO_chg5d
+T5YIFR_chg21d                 UNRATE_chg21d                 INDPRO_chg21d
+T5YIFR_chg63d                 UNRATE_chg63d                 INDPRO_chg63d
+T5YIFR_vol21d                 UNRATE_vol21d                 INDPRO_vol21d
+T5YIFR_zscore                 UNRATE_zscore                 INDPRO_zscore
+T5YIFR_momentum               UNRATE_momentum               INDPRO_momentum
+
+UMCSENT_chg5d                 VIXCLS_chg5d                  DTWEXBGS_chg5d
+UMCSENT_chg21d                VIXCLS_chg21d                 DTWEXBGS_chg21d
+UMCSENT_chg63d                VIXCLS_chg63d                 DTWEXBGS_chg63d
+UMCSENT_vol21d                VIXCLS_vol21d                 DTWEXBGS_vol21d
+UMCSENT_zscore                VIXCLS_zscore                 DTWEXBGS_zscore
+UMCSENT_momentum              VIXCLS_momentum               DTWEXBGS_momentum
+
+spread_2s10s_chg5d            spread_5s30s_chg5d            real_10y_chg5d
+spread_2s10s_chg21d           spread_5s30s_chg21d           real_10y_chg21d
+spread_2s10s_chg63d           spread_5s30s_chg63d           real_10y_chg63d
+spread_2s10s_vol21d           spread_5s30s_vol21d           real_10y_vol21d
+spread_2s10s_zscore           spread_5s30s_zscore           real_10y_zscore
+spread_2s10s_momentum         spread_5s30s_momentum         real_10y_momentum
+
+===================================================
+TARGETS (not used as input features)
+===================================================
+
+dgs2_dir          Binary: 1 if DGS2 rises over next 5 trading days, 0 if falls
+dgs10_dir         Binary: 1 if DGS10 rises over next 5 trading days, 0 if falls
+spread_2s10s_dir  Binary: 1 if 2s10s spread widens (steepens) over next 5 trading days, 0 if narrows (flattens)
+
+Days with exactly 0 bp forward change are excluded from training and evaluation.
+
+===================================================
+STANDARDIZATION
+===================================================
+
+All 90 features are standardized using sklearn.preprocessing.StandardScaler
+fit ONLY on the training set (2005-2018). Validation and test sets are
+transformed using training set mean and standard deviation to prevent
+future information leakage.
+
+===================================================
+LSTM INPUT FORMAT
+===================================================
+
+The LSTM receives a 60-trading-day sliding window of all 90 features.
+Input tensor shape: (batch_size, 60, 90)
+
+XGBoost receives a single row of 90 features (point-in-time snapshot).
