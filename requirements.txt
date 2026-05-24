@@ -2,6 +2,7 @@ pandas>=2.0.0
 numpy>=1.24.0
 requests>=2.31.0
 torch>=2.0.0
+torchinfo>=1.8.0
 xgboost>=2.0.0
 optuna>=3.0.0
 shap>=0.42.0
