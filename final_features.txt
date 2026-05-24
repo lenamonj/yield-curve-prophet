@@ -22,9 +22,9 @@ UMCSENT           U of Michigan Consumer Sentiment (monthly, ffill)     Monthly
 VIXCLS            CBOE Volatility Index (VIX)                           Daily
 DTWEXBGS          Trade-Weighted US Dollar Index (Broad Goods/Svc)      Daily
 
-Note: ICSA (Initial Jobless Claims) and BAMLH0A0HYM2 (HY OAS) were dropped
-due to <50% coverage across the full sample period. TEDRATE (TED Spread) was
-removed because it was discontinued in January 2022, causing downstream NaN
+Note: ICSA (Initial Jobless Claims) was dropped due to <50% coverage across
+the full sample period after alignment. TEDRATE (TED Spread) was removed
+because it was discontinued in January 2022, causing downstream NaN
 propagation in rolling z-score calculations.
 
 ===================================================
