@@ -3,7 +3,7 @@ YIELD CURVE PROPHET - COMPLETE FEATURE DICTIONARY
 Generated: May 2026
 Total features used in model: 90
 Source: FRED API (Federal Reserve Economic Data)
-Period: 2005-2025 (~4,715 trading days after engineering)
+Period: 2007-2026 (~4,800+ trading days after engineering)
 
 ===================================================
 RAW SERIES FROM FRED (12 series)
@@ -22,10 +22,9 @@ UMCSENT           U of Michigan Consumer Sentiment (monthly, ffill)     Monthly
 VIXCLS            CBOE Volatility Index (VIX)                           Daily
 DTWEXBGS          Trade-Weighted US Dollar Index (Broad Goods/Svc)      Daily
 
-Note: ICSA (Initial Jobless Claims) was dropped due to <50% coverage across
-the full sample period after alignment. TEDRATE (TED Spread) was removed
-because it was discontinued in January 2022, causing downstream NaN
-propagation in rolling z-score calculations.
+Note: ICSA (Initial Jobless Claims) and BAMLH0A0HYM2 (ICE BofA HY OAS) were
+dropped due to <50% coverage across the full sample period after alignment.
+TEDRATE (TED Spread) was excluded because it was discontinued in January 2022.
 
 ===================================================
 DERIVED SERIES (3 series)
@@ -120,7 +119,7 @@ STANDARDIZATION
 ===================================================
 
 All 90 features are standardized using sklearn.preprocessing.StandardScaler
-fit ONLY on the training set (2005-2018). Validation and test sets are
+fit ONLY on the training set (70% split, 2007-2020). Validation and test sets are
 transformed using training set mean and standard deviation to prevent
 future information leakage.
 

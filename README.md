@@ -9,7 +9,7 @@
 <h1 align="center">Yield Curve Prophet</h1>
 
 <p align="center">
-  <strong>A PyTorch LSTM + XGBoost ensemble that predicts weekly directional moves in US Treasury yields (2Y, 10Y, 2s10s spread), trained on 19 years of FRED macro data with walk-forward validation, SHAP interpretability, and statistical significance testing.</strong>
+  <strong>A PyTorch LSTM + XGBoost ensemble that predicts weekly directional moves in US Treasury yields (2Y, 10Y, 2s10s spread), built on 19 years of FRED macro data with walk-forward validation, SHAP interpretability, and statistical significance testing.</strong>
 </p>
 
 <p align="center">
@@ -46,7 +46,7 @@ A single Jupyter notebook that runs the complete pipeline:
 
 | Stage | Description |
 |-------|-------------|
-| **Data Collection** | 12 FRED macro series, 2005-2026 |
+| **Data Collection** | 12 FRED macro series, 2007-2026 |
 | **Feature Engineering** | 90 features (rolling changes, volatility, z-scores, momentum) |
 | **XGBoost Baseline** | Optuna-tuned gradient boosting (100 trials per target), SHAP interpretability |
 | **LSTM** | 2-layer LSTM (128->64), 60-day lookback, early stopping |
@@ -133,7 +133,8 @@ yield-curve-prophet/
 |-- requirements.txt
 |-- .gitignore
 |-- final_features.txt              # Complete feature dictionary (90 features)
-+-- yield_curve_prophet.ipynb       # Full pipeline - one notebook
+|-- yield_curve_prophet.ipynb       # Full pipeline - one notebook
++-- *.png                           # Generated charts (8 figures)
 ```
 
 ---
@@ -152,6 +153,7 @@ yield-curve-prophet/
 | `shap` | Model interpretability (feature attribution) |
 | `scikit-learn` | Metrics, preprocessing, calibration |
 | `matplotlib` | Visualization |
+| `scipy` | Statistical significance testing (binomial test) |
 | `seaborn` | Statistical plots |
 
 ---
