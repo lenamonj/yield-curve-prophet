@@ -20,13 +20,13 @@
 
 ## Key Result
 
-The 2s10s spread direction (steepening vs. flattening) is predictable at **56.9% accuracy** (p = 0.0005), statistically significant at the 99.9% confidence level. Outright yield direction does not clear the 99% confidence bar required to justify a tradeable edge after transaction costs.
+The 2s10s spread direction (steepening vs. flattening) is predictable at **58.9% accuracy** (p = 0.000008), statistically significant at the 99.99% confidence level. Outright yield direction is indistinguishable from noise. The LSTM's sequential processing of 60-day lookback windows is the primary source of predictive power.
 
 | Target | XGBoost | LSTM | Ensemble | p-value | Significant at 99%? |
 |--------|---------|------|----------|---------|-------------|
-| 2Y Yield Direction | **52.8%** | 51.7% | 52.8% | 0.0886 | No |
-| 10Y Yield Direction | 47.0% | 52.8% | **53.8%** | 0.0328 | No (95% only) |
-| 2s10s Spread Direction | 55.5% | 54.4% | **56.9%** | **0.0005** | **Yes (99.9%)** |
+| 2Y Yield Direction | 48.8% | **51.7%** | 51.7% | 0.2186 | No |
+| 10Y Yield Direction | 47.0% | 48.3% | 48.3% | 0.8048 | No |
+| 2s10s Spread Direction | 49.8% | 58.0% | **58.9%** | **0.000008** | **Yes (99.99%)** |
 
 Baseline (coin flip): 50.0%
 
@@ -36,7 +36,7 @@ Baseline (coin flip): 50.0%
 
 The yield curve is the most watched indicator in fixed income. Its shape drives portfolio positioning, curve trades, and macro regime classification. Most forecasting is still discretionary - PMs reading dot plots and payrolls prints.
 
-This project tests whether a machine can beat a coin flip at predicting the direction of weekly yield moves using only free public data. The answer: outright yield direction does not survive a 99% confidence threshold, but curve spread direction carries statistically significant signal that the ensemble captures at 56.9% accuracy (p = 0.0005).
+This project tests whether a machine can beat a coin flip at predicting the direction of weekly yield moves using only free public data. The answer: outright yield direction is indistinguishable from noise, but curve spread direction carries statistically significant signal that the LSTM captures at 58.9% ensemble accuracy (p = 0.000008).
 
 ---
 
@@ -113,10 +113,10 @@ See `final_features.txt` for the complete feature dictionary (90 engineered feat
 ## Design Decisions
 
 - **70/15/15 walk-forward split** - Train (70%), validation (15%), test (15%) with 63-day leakage gaps between each split. No random shuffling, no future information leakage.
-- **XGBoost as point-in-time baseline** - Sees only today's feature snapshot. Proves whether the LSTM's sequential modeling adds value.
-- **LSTM as sequential model** - 60-day lookback window captures momentum shifts, volatility clustering, and regime transitions.
-- **Ensemble** - Weighted blend of both models, optimized per target. The combination outperforms either model alone on the 2s10s spread.
-- **Optuna over grid search** - 100-trial Bayesian optimization per target for XGBoost hyperparameters.
+- **XGBoost as point-in-time baseline** - Sees only today's feature snapshot. Aggressively regularized (L1/L2, gamma, min_child_weight 10-100, early stopping) to prevent overfitting. Collapses to near-random accuracy, confirming that point-in-time features alone are insufficient.
+- **LSTM as primary model** - 60-day lookback window captures momentum shifts, volatility clustering, and regime transitions. The sequential architecture is the primary source of predictive power on 2s10s.
+- **Ensemble** - Weighted blend of both models, optimized per target. Slightly improves upon LSTM alone on 2s10s (58.9% vs 58.0%), though the difference is not statistically significant by McNemar's test.
+- **Optuna over grid search** - 100-trial Bayesian optimization per target for XGBoost hyperparameters with 9-dimensional search space.
 - **Binary classification over regression** - Predicting "up or down" is more actionable than predicting exact basis point moves.
 - **SHAP for interpretability** - Every XGBoost prediction is explainable via feature attribution.
 - **Binomial significance test** - Statistical rigor: the null hypothesis (50% accuracy) is formally tested for each target.
