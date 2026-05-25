@@ -154,6 +154,7 @@ yield-curve-prophet/
 | `scikit-learn` | Metrics, preprocessing, calibration |
 | `matplotlib` | Visualization |
 | `scipy` | Statistical significance testing (binomial test) |
+| `statsmodels` | Statistical tests (McNemar's test) |
 | `seaborn` | Statistical plots |
 
 ---
