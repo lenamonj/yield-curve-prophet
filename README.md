@@ -20,13 +20,13 @@
 
 ## Key Result
 
-The 2s10s spread direction (steepening vs. flattening) is predictable at **60.1% accuracy** (p = 0.000005), statistically significant at the 99.9% confidence level. Outright yield direction carries weaker but detectable signal (2Y at 54.0%, 10Y at 53.6%).
+The 2s10s spread direction (steepening vs. flattening) is predictable at **56.9% accuracy** (p = 0.0005), statistically significant at the 99.9% confidence level. Outright yield direction does not clear the 99% confidence bar required to justify a tradeable edge after transaction costs.
 
-| Target | XGBoost | LSTM | Ensemble | p-value | Significant? |
+| Target | XGBoost | LSTM | Ensemble | p-value | Significant at 99%? |
 |--------|---------|------|----------|---------|-------------|
-| 2Y Yield Direction | **54.0%** | 47.3% | 47.3% | 0.0431 | Yes (95%) |
-| 10Y Yield Direction | **53.6%** | 50.5% | 50.5% | 0.0624 | Marginal (90%) |
-| 2s10s Spread Direction | 54.4% | 58.0% | **60.1%** | **0.000005** | **Yes (99.9%)** |
+| 2Y Yield Direction | **52.8%** | 51.7% | 52.8% | 0.0886 | No |
+| 10Y Yield Direction | 47.0% | 52.8% | **53.8%** | 0.0328 | No (95% only) |
+| 2s10s Spread Direction | 55.5% | 54.4% | **56.9%** | **0.0005** | **Yes (99.9%)** |
 
 Baseline (coin flip): 50.0%
 
@@ -36,7 +36,7 @@ Baseline (coin flip): 50.0%
 
 The yield curve is the most watched indicator in fixed income. Its shape drives portfolio positioning, curve trades, and macro regime classification. Most forecasting is still discretionary - PMs reading dot plots and payrolls prints.
 
-This project tests whether a machine can beat a coin flip at predicting the direction of weekly yield moves using only free public data. The answer: outright yield direction is hard, but curve spread direction carries statistically significant signal that the ensemble captures at 60.1% accuracy.
+This project tests whether a machine can beat a coin flip at predicting the direction of weekly yield moves using only free public data. The answer: outright yield direction does not survive a 99% confidence threshold, but curve spread direction carries statistically significant signal that the ensemble captures at 56.9% accuracy (p = 0.0005).
 
 ---
 
