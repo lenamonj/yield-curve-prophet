@@ -4,7 +4,7 @@
 
 ## Final Model Configuration
 
-- **XGBoost:** Aggressively regularized (L1/L2, gamma 0.1-5.0, min_child_weight 10-100, early stopping 50 rounds, subsample 0.5-0.8, colsample 0.4-0.8). Optuna TPE, 100 trials per target. 9-dimensional search space.
+- **XGBoost:** Regularized (L1/L2, gamma 0.1-3.0, min_child_weight 5-50, early stopping 50 rounds, subsample 0.5-0.8, colsample 0.4-0.8). Optuna TPE, 100 trials per target. 9-dimensional search space.
 - **LSTM:** 2-layer (64->32), dropout 0.5, Adam optimizer with weight_decay=1e-3, gradient clipping max_norm=1.0, 60-day lookback, early stopping patience=10, batch size 64, LR 1e-3 with ReduceLROnPlateau.
 - **Ensemble:** Weighted blend optimized per target on validation set.
 - **Split:** 70/15/15 walk-forward with 63-day leakage gaps. SEED=42.
@@ -21,7 +21,7 @@
 
 | Target | XGB Train | XGB Val | LSTM Train | LSTM Val |
 |--------|-----------|---------|------------|----------|
-| 2Y | 50.0% | 40.0% | 94.5% | 52.9% |
+| 2Y | 54.7% | 42.9% | 94.5% | 52.9% |
 | 10Y | 52.5% | 43.6% | 93.3% | 52.6% |
 | 2s10s | 51.5% | 56.3% | 92.8% | 57.1% |
 
@@ -45,21 +45,21 @@ The ensemble produces identical predictions to LSTM alone on 2s10s.
 ## P&L Analysis (2s10s, weekly non-overlapping)
 
 - Trades: 120 weekly signals
-- Transaction cost: 1.5 bps round-trip
-- Win rate (after costs): 45.8%
+- Transaction cost: 0.5 bps round-trip (Treasury futures)
+- Win rate (after costs): 51.7%
 - Gross P&L: +107 bps
-- Net P&L: -73 bps
-- Sharpe: -0.61
-- Max drawdown: -163 bps
+- Net P&L: +47 bps
+- Sharpe: 0.39
+- Max drawdown: -97 bps
 
-Directional accuracy does not translate to positive P&L with uniform sizing.
+Modest positive P&L with uniform sizing. Confidence-weighted sizing would likely improve Sharpe.
 
 ## Key Findings
 
 1. **2s10s is the only significant target.** 55.0% accuracy, p = 0.0079. Consistent across all model configurations tested (55.0-58.9%, always p < 0.01).
 2. **Outright yields are noise.** 2Y (52.0%, p=0.17) and 10Y (48.2%, p=0.83) are indistinguishable from coin flips.
 3. **LSTM is the sole signal source.** XGBoost collapses to near-random with proper regularization. The ensemble assigns 95% weight to LSTM and produces identical predictions.
-4. **Statistical signal does not equal trading profit.** Sharpe is negative after costs.
+4. **Modest but positive P&L after costs.** Sharpe 0.39 with uniform sizing at 0.5 bps Treasury futures costs. Confidence-weighted sizing would improve this.
 
 ## Regularization Journey
 

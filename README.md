@@ -113,7 +113,7 @@ See `final_features.txt` for the complete feature dictionary (90 engineered feat
 ## Design Decisions
 
 - **70/15/15 walk-forward split** - Train (70%), validation (15%), test (15%) with 63-day leakage gaps between each split. No random shuffling, no future information leakage.
-- **XGBoost as point-in-time baseline** - Sees only today's feature snapshot. Aggressively regularized (L1/L2, gamma, min_child_weight 10-100, early stopping) to prevent overfitting. Collapses to near-random accuracy, confirming that point-in-time features alone are insufficient.
+- **XGBoost as point-in-time baseline** - Sees only today's feature snapshot. Regularized (L1/L2, gamma, min_child_weight 5-50, early stopping) to prevent overfitting. Collapses to near-random accuracy, confirming that point-in-time features alone are insufficient.
 - **LSTM as primary model** - 2-layer (64->32) with 60-day lookback, dropout 0.5, weight decay 1e-3, and gradient clipping. Captures momentum shifts, volatility clustering, and regime transitions. The sequential architecture is the sole source of predictive power on 2s10s.
 - **Ensemble** - Weighted blend of both models, optimized per target on validation set. On 2s10s the ensemble assigns 95% weight to LSTM, producing identical predictions to LSTM alone (McNemar p = 1.0).
 - **Optuna over grid search** - 100-trial Bayesian optimization per target for XGBoost hyperparameters with 9-dimensional search space.
