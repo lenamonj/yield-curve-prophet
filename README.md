@@ -20,13 +20,13 @@
 
 ## Key Result
 
-The 2s10s spread direction (steepening vs. flattening) is predictable at **58.9% accuracy** (p = 0.000008), statistically significant at the 99.99% confidence level. Outright yield direction is indistinguishable from noise. The LSTM's sequential processing of 60-day lookback windows is the primary source of predictive power.
+The 2s10s spread direction (steepening vs. flattening) is predictable at **55.0% accuracy** (p = 0.008), statistically significant at the 99% confidence level. Outright yield direction is indistinguishable from noise. The LSTM's sequential processing of 60-day lookback windows is the sole source of predictive power.
 
 | Target | XGBoost | LSTM | Ensemble | p-value | Significant at 99%? |
 |--------|---------|------|----------|---------|-------------|
-| 2Y Yield Direction | 48.8% | **51.7%** | 51.7% | 0.2186 | No |
-| 10Y Yield Direction | 47.0% | 48.3% | 48.3% | 0.8048 | No |
-| 2s10s Spread Direction | 49.8% | 58.0% | **58.9%** | **0.000008** | **Yes (99.99%)** |
+| 2Y Yield Direction | 48.8% | **52.0%** | 52.0% | 0.1735 | No |
+| 10Y Yield Direction | 47.0% | 48.2% | 48.2% | 0.8265 | No |
+| 2s10s Spread Direction | 49.8% | **55.0%** | 55.0% | **0.0079** | **Yes (99%)** |
 
 Baseline (coin flip): 50.0%
 
@@ -36,7 +36,7 @@ Baseline (coin flip): 50.0%
 
 The yield curve is the most watched indicator in fixed income. Its shape drives portfolio positioning, curve trades, and macro regime classification. Most forecasting is still discretionary - PMs reading dot plots and payrolls prints.
 
-This project tests whether a machine can beat a coin flip at predicting the direction of weekly yield moves using only free public data. The answer: outright yield direction is indistinguishable from noise, but curve spread direction carries statistically significant signal that the LSTM captures at 58.9% ensemble accuracy (p = 0.000008).
+This project tests whether a machine can beat a coin flip at predicting the direction of weekly yield moves using only free public data. The answer: outright yield direction is indistinguishable from noise, but curve spread direction carries statistically significant signal that the LSTM captures at 55.0% accuracy (p = 0.008).
 
 ---
 
@@ -49,7 +49,7 @@ A single Jupyter notebook that runs the complete pipeline:
 | **Data Collection** | 12 FRED macro series, 2007-2026 |
 | **Feature Engineering** | 90 features (rolling changes, volatility, z-scores, momentum) |
 | **XGBoost Baseline** | Optuna-tuned gradient boosting (100 trials per target), SHAP interpretability |
-| **LSTM** | 2-layer LSTM (128->64), 60-day lookback, early stopping |
+| **LSTM** | 2-layer LSTM (64->32), 60-day lookback, early stopping, weight decay |
 | **Ensemble** | Weighted blend optimized per target on validation set |
 | **Significance Test** | Binomial test on each target (H0: accuracy = 50%) |
 | **Evaluation** | ROC curves, confusion matrices, rolling accuracy, calibration, hypothetical P&L |
@@ -114,8 +114,8 @@ See `final_features.txt` for the complete feature dictionary (90 engineered feat
 
 - **70/15/15 walk-forward split** - Train (70%), validation (15%), test (15%) with 63-day leakage gaps between each split. No random shuffling, no future information leakage.
 - **XGBoost as point-in-time baseline** - Sees only today's feature snapshot. Aggressively regularized (L1/L2, gamma, min_child_weight 10-100, early stopping) to prevent overfitting. Collapses to near-random accuracy, confirming that point-in-time features alone are insufficient.
-- **LSTM as primary model** - 60-day lookback window captures momentum shifts, volatility clustering, and regime transitions. The sequential architecture is the primary source of predictive power on 2s10s.
-- **Ensemble** - Weighted blend of both models, optimized per target. Slightly improves upon LSTM alone on 2s10s (58.9% vs 58.0%), though the difference is not statistically significant by McNemar's test.
+- **LSTM as primary model** - 2-layer (64->32) with 60-day lookback, dropout 0.5, weight decay 1e-3, and gradient clipping. Captures momentum shifts, volatility clustering, and regime transitions. The sequential architecture is the sole source of predictive power on 2s10s.
+- **Ensemble** - Weighted blend of both models, optimized per target on validation set. On 2s10s the ensemble assigns 95% weight to LSTM, producing identical predictions to LSTM alone (McNemar p = 1.0).
 - **Optuna over grid search** - 100-trial Bayesian optimization per target for XGBoost hyperparameters with 9-dimensional search space.
 - **Binary classification over regression** - Predicting "up or down" is more actionable than predicting exact basis point moves.
 - **SHAP for interpretability** - Every XGBoost prediction is explainable via feature attribution.
